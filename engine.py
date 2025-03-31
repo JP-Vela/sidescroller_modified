@@ -1,7 +1,7 @@
 
 import csv
 import pygame
-from pygame.sprite import spritecollide
+from pygame.sprite import spritecollide, groupcollide
 from pygame.transform import scale
 from pygame.sprite import Group
 from pygame.image import load
@@ -219,9 +219,9 @@ class GameEngine():
 
 
     def handle_bullet_collision(self):
-        for bullet in self.groups['bullet']:
-            for collided in spritecollide(bullet, self.groups['obstacle'], False):
-                bullet.kill()
+        groupcollide(self.groups['bullet'], self.groups['obstacle'], True, False)
+
+            
 
     
     def handle_fall_damage(self, vel_y):
