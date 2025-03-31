@@ -18,7 +18,7 @@ class GameModes(IntEnum):
 @dataclass(frozen=True)
 class EnvironmentSettings:
     GRAVITY = 0.75
-    SOLDIER_JUMP_STRENGTH = -13
+    SOLDIER_JUMP_STRENGTH = -15
     BULLET_FULL_DAMAGE = 25
     BULLET_VELOCITY_X = 15
     GRENADE_FULL_DAMAGE = 100
@@ -33,6 +33,7 @@ class EnvironmentSettings:
     SOLDIER_THROW_DELAY = 2000
     SOLDIER_SCALE = 1.65
     ANIMATION_DELAY = 100
+    FALL_DAMAGE = 10
 
 # TODO: define TILE_SIZE from the image dimensions instead of hardcoded value
 @dataclass(frozen=True)

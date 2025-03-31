@@ -13,9 +13,11 @@ from weapons import ItemBox, Explosion
 from settings import (SCREEN_HEIGHT, SCREEN_WIDTH, SCROLL_RIGHT, SCROLL_LEFT,
                       ENVIRONMENT, TILEMAP, COLOR, Direction, GameModes)
 
+import time
+
 
 # Intialize background music
-pygame.mixer.music.load('audio/music.mp3')
+pygame.mixer.music.load('audio/music2.mp3')
 pygame.mixer.music.set_volume(0.3)
 pygame.mixer.music.play(-1, 0.0, 2500)
 
@@ -58,6 +60,7 @@ class GameEngine():
         '''
         self.game_mode = game_mode
         self.level = 1
+        self.first_frame = True
 
     def reset_world(self):
         ''' 
@@ -68,6 +71,7 @@ class GameEngine():
         self.level_complete = False
         self.camera_scroll = 0
         self.bg_scroll = 0
+        self.first_frame = True
 
         # Create a bunch of empty sprite groups
         self.group_names = [ 'obstacle', 'water', 'decoration', 'exit', 'item',
@@ -212,7 +216,26 @@ class GameEngine():
                 if enemy.health >= 0:
                     enemy.health -= bullet.damage
                     bullet.kill()
+
+
+    def handle_bullet_collision(self):
+        for bullet in self.groups['bullet']:
+            for collided in spritecollide(bullet, self.groups['obstacle'], False):
+                bullet.kill()
+
     
+    def handle_fall_damage(self, vel_y):
+        '''
+        Check for fall damage given velocity when player collides with the ground
+        '''
+        if vel_y == 20:
+            if self.first_frame:
+                self.first_frame = False
+            else:
+                print("Fall damage")
+                self.player.health -= ENVIRONMENT.FALL_DAMAGE
+
+
     def make_grenades_explode(self):
         '''
         Check for exploding grenades and initiate animation.
@@ -249,12 +272,13 @@ class GameEngine():
         '''
 
         # If the player is moving too far right or left, scroll the screen
-        if ((self.player.direction == Direction.RIGHT 
+        '''if ((self.player.direction == Direction.RIGHT 
                 and self.player.rect.right + self.camera_scroll >= SCROLL_RIGHT
                 and self.bg_scroll + SCREEN_WIDTH < self.world_width)
             or (self.player.direction == Direction.LEFT 
                 and self.player.rect.left + self.camera_scroll < SCROLL_LEFT
-                and self.bg_scroll > 0)):
+                and self.bg_scroll > 0)):'''
+        if True:
             self.camera_scroll -= self.player.dx
             self.bg_scroll += self.player.dx
 
@@ -271,6 +295,9 @@ class GameEngine():
         # Calculate lateral movement
         sprite.dx = int(sprite.vel_x * sprite.direction.value)
 
+        if sprite.dy>1:
+            self.player.in_air = True        
+
         # Detect collisions with wall (x) and ground (y) obstacles
         for tile in self.groups['obstacle']:
             predicted_x = pygame.Rect(sprite.rect.x + sprite.dx, sprite.rect.y,
@@ -284,6 +311,8 @@ class GameEngine():
             predicted_y = pygame.Rect(sprite.rect.x, sprite.rect.y + sprite.dy,
                                       sprite.rect.width, sprite.rect.height)
             if tile.rect.colliderect(predicted_y):
+                self.handle_fall_damage(sprite.vel_y)
+
                 if sprite.vel_y < 0: # jumping and hitting head
                     sprite.dy = tile.rect.bottom - sprite.rect.top
                 if sprite.vel_y > 0:
@@ -327,6 +356,7 @@ class GameEngine():
         self.collect_item_boxes()
         self.handle_bullet_damage()
         self.make_grenades_explode()
+        self.handle_bullet_collision()
 
         # Standard updates to all sprite groups
         self.player.update()
