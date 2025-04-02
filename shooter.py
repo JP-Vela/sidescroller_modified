@@ -77,7 +77,7 @@ def run_main_menu(engine: GameEngine,
     if start_button.is_clicked():
         engine.game_mode = GameModes.INTERACTIVE
         engine.load_current_level()
-        intro_fade.begin_fade()
+        # intro_fade.begin_fade()
     if exit_button.is_clicked():
         engine.game_mode = GameModes.QUIT
 
